@@ -2071,7 +2071,11 @@ figure {
   }
 
   .header-nav {
-    display: none;
+    gap: 16px;
+  }
+
+  .header-nav a {
+    font-size: 0.72rem;
   }
 
   .hero-inner {
@@ -2134,11 +2138,34 @@ figure {
 
 @media (max-width: 720px) {
   html {
-    scroll-padding-top: 92px;
+    scroll-padding-top: 123px;
   }
 
   body {
     background-attachment: scroll;
+  }
+
+  /* Two-row header so the section links stay reachable on phones. */
+  .header-inner {
+    flex-wrap: wrap;
+    row-gap: 0;
+    border-radius: 20px;
+    padding: 7px 10px 7px 12px;
+  }
+
+  .header-nav {
+    order: 3;
+    flex: 1 0 100%;
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 5px 0 0;
+    padding: 7px 2px 0;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .header-nav a {
+    font-size: 0.7rem;
   }
 
   .section-inner {
@@ -2253,7 +2280,7 @@ figure {
   }
 
   .filter-shell {
-    top: 66px;
+    top: 115px;
     padding: 10px;
     border-radius: 16px;
   }

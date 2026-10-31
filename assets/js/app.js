@@ -468,7 +468,9 @@
   function watchlistAnchor() {
     const section = document.getElementById("watchlist");
     if (!section) return window.scrollY;
-    return section.getBoundingClientRect().top + window.scrollY - 92;
+    const header = document.getElementById("siteHeader");
+    const offset = header ? header.getBoundingClientRect().bottom + 24 : 92;
+    return section.getBoundingClientRect().top + window.scrollY - offset;
   }
 
   function applyFiltersAndReturn() {
