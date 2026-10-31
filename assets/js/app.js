@@ -4,6 +4,8 @@
   "use strict";
 
   const TOTAL = FILMS.length;
+  const MOVIE_COUNT = FILMS.filter((film) => film.type === "movie").length;
+  const SERIES_COUNT = FILMS.filter((film) => film.type === "series").length;
   const STORAGE_KEY = "blindReel.revealed.v1";
   const ACCENTS = ["#f5c451", "#ff7a59", "#7fe7d4", "#b8a1ff", "#7cc7ff", "#ff9ec4"];
 
@@ -44,19 +46,26 @@
     toastText: document.getElementById("toastText"),
     toTop: document.getElementById("toTop"),
     header: document.getElementById("siteHeader"),
-    scrollBar: document.getElementById("scrollBar")
+    scrollBar: document.getElementById("scrollBar"),
+    liveBand: document.getElementById("liveBand"),
+    liveGrid: document.getElementById("liveGrid"),
+    liveStatus: document.getElementById("liveStatus"),
+    liveMore: document.getElementById("liveMore")
   };
 
   const state = {
     type: "all",
     mood: "all",
     revealed: loadRevealed(),
-    toastTimer: 0
+    toastTimer: 0,
+    lastPick: ""
   };
 
   let cards = [];
   let observer = null;
   let toastId = 0;
+  let panelSeq = 0;
+  const liveIds = new Set();
 
   /* -------------------------------------------------------------------------
      Helpers
@@ -95,8 +104,8 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      const valid = new Set(FILMS.map((film) => film.title));
-      return new Set(Array.isArray(parsed) ? parsed.filter((title) => valid.has(title)) : []);
+      if (!Array.isArray(parsed)) return new Set();
+      return new Set(parsed.filter((title) => typeof title === "string"));
     } catch (error) {
       return new Set();
     }
@@ -111,7 +120,7 @@
   }
 
   function yearLabel(film) {
-    if (film.endYear) return `${film.year}–${film.endYear}`;
+    if (film.endYear && film.endYear !== film.year) return `${film.year}–${film.endYear}`;
     if (film.type === "series" && film.ongoing) return `${film.year}–`;
     return `${film.year}`;
   }
@@ -136,6 +145,21 @@
     return list[Math.floor(Math.random() * list.length)];
   }
 
+  function fillCounts() {
+    const counts = {
+      total: TOTAL,
+      movies: MOVIE_COUNT,
+      series: SERIES_COUNT,
+      bollywood: FILMS.filter((film) => film.sector === "bollywood").length,
+      world: FILMS.filter((film) => film.sector === "world").length
+    };
+
+    document.querySelectorAll("[data-count]").forEach((node) => {
+      const key = node.dataset.count;
+      if (counts[key] !== undefined) node.textContent = counts[key];
+    });
+  }
+
   /* -------------------------------------------------------------------------
      Render
      ------------------------------------------------------------------------- */
@@ -151,29 +175,40 @@
   });
   while (seriesPool.length) ordered.push(seriesPool.shift());
 
-  function cardMarkup(film, position) {
-    const accent = ACCENTS[position % ACCENTS.length];
+  function sectorTag(film) {
+    if (film.sector === "bollywood") return `<span class="tag tag-sector">Bollywood</span>`;
+    if (film.sector === "world") return `<span class="tag tag-sector tag-world">World</span>`;
+    return "";
+  }
+
+  function cardMarkup(film, position, options = {}) {
+    const { live = false } = options;
+    const accent = live ? "#7fe7d4" : ACCENTS[position % ACCENTS.length];
     const typeLabel = film.type === "series" ? "Series" : "Movie";
     const typeIcon = film.type === "series" ? "i-tv" : "i-film";
-    const panelId = `reveal-${position + 1}`;
+    panelSeq += 1;
+    const panelId = `reveal-${panelSeq}`;
     const tags = film.genres
       .slice(0, 3)
       .map((genre) => `<span class="tag">${esc(genre)}</span>`)
       .join("");
+    const rating = Number(film.rating);
 
     return `
-      <article class="card" data-title="${esc(film.title)}" data-type="${film.type}" data-moods="${film.moods.join(" ")}" style="--accent:${accent}">
+      <article class="card${live ? " card-live" : ""}" data-title="${esc(film.title)}" data-type="${film.type}" data-sector="${esc(film.sector || "global")}" data-imdb="${esc(film.imdb || "")}" data-moods="${film.moods.join(" ")}" style="--accent:${accent}">
         <div class="confetti" aria-hidden="true"></div>
         <div class="card-top">
           <span class="card-type${film.type === "series" ? " is-series" : ""}">
             <svg class="icon" aria-hidden="true"><use href="#${typeIcon}"/></svg>
             ${typeLabel}
           </span>
-          <span class="card-num">${String(position + 1).padStart(2, "0")}</span>
+          ${live
+            ? `<span class="live-pill">Live</span>`
+            : `<span class="card-num">${String(position + 1).padStart(2, "0")}</span>`}
         </div>
-        <div class="card-tags">${tags}</div>
+        <div class="card-tags">${sectorTag(film)}${tags}</div>
         <div class="card-body">
-          <span class="story-label">The story</span>
+          <span class="story-label">${live ? "Auto synopsis" : "The story"}</span>
           <p class="card-story">${esc(film.story)}</p>
         </div>
         <div class="card-foot">
@@ -190,8 +225,10 @@
                 <p class="reveal-kicker">The title was</p>
                 <h3 class="reveal-title">${esc(film.title)}<span class="year">${yearLabel(film)}</span></h3>
                 <div class="reveal-meta">
-                  <span class="rating-badge"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>${film.rating.toFixed(1)}<small>IMDb</small></span>
-                  <span class="meta-item"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>${esc(film.length)}</span>
+                  ${Number.isFinite(rating) && rating
+                    ? `<span class="rating-badge"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg><span class="rating-value">${rating.toFixed(1)}</span><small>IMDb</small></span>`
+                    : ""}
+                  <span class="meta-item"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span class="runtime-value">${esc(film.length)}</span></span>
                   <span class="meta-item"><svg class="icon" aria-hidden="true"><use href="#i-film"/></svg>${esc(film.language)}</span>
                 </div>
                 <p class="reveal-vibe">“${esc(film.vibe)}”</p>
@@ -207,12 +244,9 @@
   }
 
   function render() {
-    els.grid.innerHTML = ordered.map(cardMarkup).join("");
+    els.grid.innerHTML = ordered.map((film, index) => cardMarkup(film, index)).join("");
     cards = [...els.grid.querySelectorAll(".card")];
 
-    document.getElementById("countAll").textContent = TOTAL;
-    document.getElementById("countMovies").textContent = FILMS.filter((film) => film.type === "movie").length;
-    document.getElementById("countSeries").textContent = FILMS.filter((film) => film.type === "series").length;
     els.headerTotal.textContent = TOTAL;
 
     // Re-apply saved reveals without celebration.
@@ -222,7 +256,7 @@
       }
     });
 
-    setupObserver();
+    observe(cards);
     updateProgress();
   }
 
@@ -236,25 +270,29 @@
       >${mood.label}</button>`).join("");
   }
 
-  function setupObserver() {
+  function observe(list) {
     if (!("IntersectionObserver" in window)) {
-      cards.forEach((card) => card.classList.add("is-visible"));
+      list.forEach((card) => card.classList.add("is-visible"));
       return;
     }
 
-    observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { rootMargin: "0px 0px -36px 0px", threshold: 0.04 }
-    );
+    if (!observer) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { rootMargin: "0px 0px -36px 0px", threshold: 0.04 }
+      );
+    }
 
-    cards.forEach((card) => observer.observe(card));
+    list.forEach((card) => {
+      if (!card.classList.contains("is-visible")) observer.observe(card);
+    });
   }
 
   /* -------------------------------------------------------------------------
@@ -342,19 +380,31 @@
     }
   }
 
+  /* A picked card glows, but stays sealed. */
+  function spotlight(card) {
+    card.classList.remove("is-picked");
+    // force the animation to restart when the same card is picked twice
+    void card.offsetWidth;
+    card.classList.add("is-picked");
+    window.setTimeout(() => card.classList.remove("is-picked"), 3200);
+  }
+
   /* -------------------------------------------------------------------------
      Progress
      ------------------------------------------------------------------------- */
 
   function updateProgress() {
-    const count = state.revealed.size;
+    const revealedCurated = [...state.revealed].filter((title) =>
+      FILMS.some((film) => film.title === title)
+    );
+    const count = revealedCurated.length;
     const percent = TOTAL ? (count / TOTAL) * 100 : 0;
 
     els.headerCount.textContent = count;
     els.progressText.textContent = `${count} of ${TOTAL} revealed`;
     els.progressBar.style.width = `${percent}%`;
     els.headerBar.style.width = `${percent}%`;
-    els.resetBtn.hidden = count === 0;
+    els.resetBtn.hidden = state.revealed.size === 0;
   }
 
   /* -------------------------------------------------------------------------
@@ -379,13 +429,20 @@
     });
   }
 
+  function matchesType(card) {
+    if (state.type === "all") return true;
+    if (state.type === "movie" || state.type === "series") {
+      return card.dataset.type === state.type;
+    }
+    return card.dataset.sector === state.type;
+  }
+
   function applyFilters() {
     let visible = 0;
 
     cards.forEach((card) => {
-      const typeMatch = state.type === "all" || card.dataset.type === state.type;
       const moodMatch = state.mood === "all" || card.dataset.moods.split(" ").includes(state.mood);
-      const show = typeMatch && moodMatch;
+      const show = matchesType(card) && moodMatch;
       card.hidden = !show;
 
       if (show) {
@@ -422,37 +479,115 @@
   }
 
   /* -------------------------------------------------------------------------
-     Surprise me
+     Surprise me — picks a card, never opens it
      ------------------------------------------------------------------------- */
 
   function surprise() {
-    const visible = cards.filter((card) => !card.hidden);
-    let pool = visible.filter((card) => !state.revealed.has(card.dataset.title));
+    const visible = cards.filter((card) => !card.hidden && !state.revealed.has(card.dataset.title));
+    let pool = visible.filter((card) => card.dataset.title !== state.lastPick);
+
+    if (!pool.length) pool = visible;
+    if (pool.length === 1 && pool[0].dataset.title === state.lastPick) pool = visible;
 
     if (!pool.length) {
-      pool = cards.filter((card) => !state.revealed.has(card.dataset.title));
-      if (pool.length) {
+      const unrevealed = cards.filter((card) => !state.revealed.has(card.dataset.title));
+      if (unrevealed.length) {
         resetFilters();
+        pool = unrevealed.filter((card) => card.dataset.title !== state.lastPick);
+        if (!pool.length) pool = unrevealed;
       }
     }
 
     if (!pool.length) {
-      showToast("All 60 revealed. Reset the mystery to play again.");
-      els.resetBtn.animate(
-        [
-          { transform: "scale(1)" },
-          { transform: "scale(1.12)" },
-          { transform: "scale(1)" }
-        ],
-        { duration: 480, easing: "ease" }
-      );
+      showToast(`All ${TOTAL} titles are out. Reset the mystery to play again.`);
+      if (els.resetBtn.animate) {
+        els.resetBtn.animate(
+          [
+            { transform: "scale(1)" },
+            { transform: "scale(1.12)" },
+            { transform: "scale(1)" }
+          ],
+          { duration: 480, easing: "ease" }
+        );
+      }
       return;
     }
 
     const card = randomFrom(pool);
+    state.lastPick = card.dataset.title;
     card.hidden = false;
-    setRevealed(card, true, { celebrate: true, toast: true });
     scrollToCard(card);
+    spotlight(card);
+    showToast("Mystery pick. The title stays sealed.");
+  }
+
+  /* -------------------------------------------------------------------------
+     Live catalogue (Cinemeta, keyless)
+     ------------------------------------------------------------------------- */
+
+  async function loadLive(options = {}) {
+    const { force = false, more = false } = options;
+    const api = window.BlindReelAPI;
+
+    if (!api || !els.liveGrid) return;
+
+    if (!more) els.liveStatus.textContent = "Connecting…";
+
+    try {
+      const items = await api.fresh({
+        count: more ? 3 : 6,
+        exclude: [...FILMS.map((film) => film.imdb), ...liveIds],
+        force
+      });
+
+      if (!items.length) {
+        els.liveStatus.textContent = "You have seen everything on the shelf.";
+        if (els.liveMore) els.liveMore.disabled = true;
+        return;
+      }
+
+      const start = els.liveGrid.children.length;
+      const html = items.map((film, index) => {
+        liveIds.add(film.id);
+        return cardMarkup(film, start + index, { live: true });
+      }).join("");
+
+      els.liveGrid.insertAdjacentHTML("beforeend", html);
+      els.liveBand.hidden = false;
+
+      const fresh = [...els.liveGrid.querySelectorAll(".card")].slice(start);
+      fresh.forEach((card) => {
+        if (state.revealed.has(card.dataset.title)) {
+          setRevealed(card, true, { celebrate: false, toast: false });
+        }
+      });
+      observe(fresh);
+
+      els.liveStatus.textContent = `${liveIds.size} added live · refreshed just now`;
+      if (els.liveMore) els.liveMore.disabled = false;
+    } catch (error) {
+      els.liveStatus.textContent = "Live catalogue unavailable — the curated list still works.";
+    }
+  }
+
+  /* Refresh a slice of curated ratings in the background. */
+  async function hydrate() {
+    const api = window.BlindReelAPI;
+    if (!api) return;
+
+    try {
+      const updated = await api.refresh(FILMS, 12);
+      Object.entries(updated).forEach(([imdb, meta]) => {
+        document.querySelectorAll(`.card[data-imdb="${imdb}"]`).forEach((card) => {
+          const ratingNode = card.querySelector(".rating-value");
+          if (ratingNode && meta.rating) ratingNode.textContent = meta.rating.toFixed(1);
+          const runtimeNode = card.querySelector(".runtime-value");
+          if (runtimeNode && meta.runtime) runtimeNode.textContent = meta.runtime;
+        });
+      });
+    } catch (error) {
+      /* Offline or rate-limited: bundled ratings remain. */
+    }
   }
 
   /* -------------------------------------------------------------------------
@@ -474,7 +609,8 @@
       applyFiltersAndReturn();
     });
 
-    els.grid.addEventListener("click", (event) => {
+    // Delegated so live cards work too.
+    document.addEventListener("click", (event) => {
       const button = event.target.closest(".reveal-btn");
       if (!button) return;
       const card = button.closest(".card");
@@ -486,7 +622,7 @@
       let frame = 0;
       let pointerEvent = null;
 
-      els.grid.addEventListener(
+      document.addEventListener(
         "pointermove",
         (event) => {
           pointerEvent = event;
@@ -510,20 +646,22 @@
     document.getElementById("ctaSurprise").addEventListener("click", surprise);
     document.getElementById("emptySurprise").addEventListener("click", surprise);
 
+    if (els.liveMore) {
+      els.liveMore.addEventListener("click", () => loadLive({ more: true }));
+    }
+
     els.resetBtn.addEventListener("click", () => {
-      const confirmed = window.confirm("Hide all 60 titles and start the mystery over?");
+      const confirmed = window.confirm(`Hide all ${TOTAL} titles and start the mystery over?`);
       if (!confirmed) return;
 
-      cards.forEach((card) => {
-        if (card.classList.contains("is-revealed")) {
-          setRevealed(card, false, { toast: false });
-        }
+      document.querySelectorAll(".card.is-revealed").forEach((card) => {
+        setRevealed(card, false, { toast: false });
       });
 
       state.revealed.clear();
       saveRevealed();
       updateProgress();
-      showToast("The mystery is back. All 60 titles hidden.");
+      showToast(`The mystery is back. All ${TOTAL} titles hidden.`);
     });
 
     els.toTop.addEventListener("click", () => {
@@ -549,9 +687,13 @@
      Boot
      ------------------------------------------------------------------------- */
 
+  fillCounts();
   renderMoodChips();
   render();
   bindEvents();
   applyFilters();
   updateProgress();
+
+  hydrate();
+  loadLive();
 })();

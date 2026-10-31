@@ -1,0 +1,422 @@
+{
+  "The Breakfast Club": {
+    "id": "tt0088847",
+    "imdbName": "The Breakfast Club",
+    "imdbYear": "1985",
+    "rating": "7.8",
+    "runtime": "98 min"
+  },
+  "Bridge of Spies": {
+    "id": "tt3682448",
+    "imdbName": "Bridge of Spies",
+    "imdbYear": "2015",
+    "rating": "7.6",
+    "runtime": "141 min"
+  },
+  "A Real Pain": {
+    "id": "tt21823606",
+    "imdbName": "A Real Pain",
+    "imdbYear": "2024",
+    "rating": "7.0",
+    "runtime": "90 min"
+  },
+  "Companion": {
+    "id": "tt26584495",
+    "imdbName": "Companion",
+    "imdbYear": "2025",
+    "rating": "6.9",
+    "runtime": "97 min"
+  },
+  "Colombiana": {
+    "id": "tt1657507",
+    "imdbName": "Colombiana",
+    "imdbYear": "2011",
+    "rating": "6.4",
+    "runtime": "108 min"
+  },
+  "12 Feet Deep": {
+    "id": "tt5143226",
+    "imdbName": "12 Feet Deep",
+    "imdbYear": "2017",
+    "rating": "5.2",
+    "runtime": "85 min"
+  },
+  "In the House": {
+    "id": "tt1964624",
+    "imdbName": "In the House",
+    "imdbYear": "2012",
+    "rating": "7.3",
+    "runtime": "105 min"
+  },
+  "Dude, Where's My Car?": {
+    "id": "tt0242423",
+    "imdbName": "Dude, Where's My Car?",
+    "imdbYear": "2000",
+    "rating": "5.5",
+    "runtime": "83 min"
+  },
+  "The Campaign": {
+    "id": "tt1790886",
+    "imdbName": "The Campaign",
+    "imdbYear": "2012",
+    "rating": "6.1",
+    "runtime": "85 min"
+  },
+  "I Care a Lot": {
+    "id": "tt9893250",
+    "imdbName": "I Care a Lot",
+    "imdbYear": "2021",
+    "rating": "6.4",
+    "runtime": "119 min"
+  },
+  "Red Eye": {
+    "id": "tt0421239",
+    "imdbName": "Red Eye",
+    "imdbYear": "2005",
+    "rating": "6.4",
+    "runtime": "85 min"
+  },
+  "Eddie the Eagle": {
+    "id": "tt1083452",
+    "imdbName": "Eddie the Eagle",
+    "imdbYear": "2016",
+    "rating": "7.3",
+    "runtime": "106 min"
+  },
+  "The Station Agent": {
+    "id": "tt0340377",
+    "imdbName": "The Station Agent",
+    "imdbYear": "2003",
+    "rating": "7.6",
+    "runtime": "88 min"
+  },
+  "The Goldfinch": {
+    "id": "tt3864056",
+    "imdbName": "The Goldfinch",
+    "imdbYear": "2019",
+    "rating": "6.4",
+    "runtime": "149 min"
+  },
+  "Men of Honor": {
+    "id": "tt0203019",
+    "imdbName": "Men of Honor",
+    "imdbYear": "2000",
+    "rating": "7.2",
+    "runtime": "129 min"
+  },
+  "Fracture": {
+    "id": "tt0488120",
+    "imdbName": "Fracture",
+    "imdbYear": "2007",
+    "rating": "7.2",
+    "runtime": "113 min"
+  },
+  "Babel": {
+    "id": "tt0449467",
+    "imdbName": "Babel",
+    "imdbYear": "2006",
+    "rating": "7.4",
+    "runtime": "143 min"
+  },
+  "Matilda": {
+    "id": "tt0117008",
+    "imdbName": "Matilda",
+    "imdbYear": "1996",
+    "rating": "7.0",
+    "runtime": "98 min"
+  },
+  "The Hunt": {
+    "id": "tt8244784",
+    "imdbName": "The Hunt",
+    "imdbYear": "2020",
+    "rating": "6.6",
+    "runtime": "90 min"
+  },
+  "Nightcrawler": {
+    "id": "tt2872718",
+    "imdbName": "Nightcrawler",
+    "imdbYear": "2014",
+    "rating": "7.8",
+    "runtime": "118 min"
+  },
+  "Buffaloed": {
+    "id": "tt8647310",
+    "imdbName": "Buffaloed",
+    "imdbYear": "2020",
+    "rating": "6.2",
+    "runtime": "95 min"
+  },
+  "Requiem for a Dream": {
+    "id": "tt0180093",
+    "imdbName": "Requiem for a Dream",
+    "imdbYear": "2000",
+    "rating": "8.3",
+    "runtime": "102 min"
+  },
+  "Law Abiding Citizen": {
+    "id": "tt1197624",
+    "imdbName": "Law Abiding Citizen",
+    "imdbYear": "2009",
+    "rating": "7.4",
+    "runtime": "109 min"
+  },
+  "Clueless": {
+    "id": "tt0112697",
+    "imdbName": "Clueless",
+    "imdbYear": "1995",
+    "rating": "6.9",
+    "runtime": "97 min"
+  },
+  "Tucker and Dale vs. Evil": {
+    "id": "tt1465522",
+    "imdbName": "Tucker and Dale vs Evil",
+    "imdbYear": "2010",
+    "rating": "7.5",
+    "runtime": "89 min"
+  },
+  "The Gentlemen": {
+    "id": "tt8367814",
+    "imdbName": "The Gentlemen",
+    "imdbYear": "2020",
+    "rating": "7.8",
+    "runtime": "113 min"
+  },
+  "Mard Ko Dard Nahi Hota": {
+    "id": "tt8055888",
+    "imdbName": "The Man Who Feels No Pain",
+    "imdbYear": "2018",
+    "rating": "7.3",
+    "runtime": "136 min"
+  },
+  "Captain Fantastic": {
+    "id": "tt3553976",
+    "imdbName": "Captain Fantastic",
+    "imdbYear": "2016",
+    "rating": "7.8",
+    "runtime": "119 min"
+  },
+  "The Neon Demon": {
+    "id": "tt1974419",
+    "imdbName": "The Neon Demon",
+    "imdbYear": "2016",
+    "rating": "6.1",
+    "runtime": "118 min"
+  },
+  "Eden Lake": {
+    "id": "tt1020530",
+    "imdbName": "Eden Lake",
+    "imdbYear": "2008",
+    "rating": "6.7",
+    "runtime": "91 min"
+  },
+  "Abigail": {
+    "id": "tt27489557",
+    "imdbName": "Abigail",
+    "imdbYear": "2024",
+    "rating": "6.5",
+    "runtime": "109 min"
+  },
+  "Rat Race": {
+    "id": "tt0250687",
+    "imdbName": "Rat Race",
+    "imdbYear": "2001",
+    "rating": "6.5",
+    "runtime": "112 min"
+  },
+  "Source Code": {
+    "id": "tt0945513",
+    "imdbName": "Source Code",
+    "imdbYear": "2011",
+    "rating": "7.5",
+    "runtime": "93 min"
+  },
+  "Under the Skin": {
+    "id": "tt1441395",
+    "imdbName": "Under the Skin",
+    "imdbYear": "2014",
+    "rating": "6.3",
+    "runtime": "108 min"
+  },
+  "Ankhon Dekhi": {
+    "id": "tt3614516",
+    "imdbName": "Ankhon Dekhi",
+    "imdbYear": "2013",
+    "rating": "7.9",
+    "runtime": "104 min"
+  },
+  "El Secreto de Sus Ojos": {
+    "id": "tt1305806",
+    "imdbName": "The Secret in Their Eyes",
+    "imdbYear": "2010",
+    "rating": "8.2",
+    "runtime": "130 min"
+  },
+  "Only the Brave": {
+    "id": "tt3829920",
+    "imdbName": "Only the Brave",
+    "imdbYear": "2017",
+    "rating": "7.6",
+    "runtime": "133 min"
+  },
+  "Hush": {
+    "id": "tt5022702",
+    "imdbName": "Hush",
+    "imdbYear": "2016",
+    "rating": "6.6",
+    "runtime": "82 min"
+  },
+  "Airplane!": {
+    "id": "tt0080339",
+    "imdbName": "Airplane!",
+    "imdbYear": "1980",
+    "rating": "7.7",
+    "runtime": "88 min"
+  },
+  "Galaxy Quest": {
+    "id": "tt0177789",
+    "imdbName": "Galaxy Quest",
+    "imdbYear": "1999",
+    "rating": "7.4",
+    "runtime": "102 min"
+  },
+  "Death Becomes Her": {
+    "id": "tt0104070",
+    "imdbName": "Death Becomes Her",
+    "imdbYear": "1992",
+    "rating": "6.7",
+    "runtime": "104 min"
+  },
+  "WarGames": {
+    "id": "tt0086567",
+    "imdbName": "WarGames",
+    "imdbYear": "1983",
+    "rating": "7.1",
+    "runtime": "114 min"
+  },
+  "Million Dollar Baby": {
+    "id": "tt0405159",
+    "imdbName": "Million Dollar Baby",
+    "imdbYear": "2005",
+    "rating": "8.1",
+    "runtime": "132 min"
+  },
+  "The Fabelmans": {
+    "id": "tt14208870",
+    "imdbName": "The Fabelmans",
+    "imdbYear": "2022",
+    "rating": "7.5",
+    "runtime": "151 min"
+  },
+  "One Day": {
+    "id": "tt1563738",
+    "imdbName": "One Day",
+    "imdbYear": "2011",
+    "rating": "7.0",
+    "runtime": "107 min"
+  },
+  "The Final Girls": {
+    "id": "tt2118624",
+    "imdbName": "The Final Girls",
+    "imdbYear": "2015",
+    "rating": "6.5",
+    "runtime": "91 min"
+  },
+  "The One I Love": {
+    "id": "tt2756032",
+    "imdbName": "The One I Love",
+    "imdbYear": "2014",
+    "rating": "7.0",
+    "runtime": "91 min"
+  },
+  "Crawl": {
+    "id": "tt8364368",
+    "imdbName": "Crawl",
+    "imdbYear": "2019",
+    "rating": "6.1",
+    "runtime": "87 min"
+  },
+  "The Leftovers": {
+    "id": "tt2699128",
+    "imdbName": "The Leftovers",
+    "imdbYear": "2014–2017",
+    "rating": "8.3",
+    "runtime": "58 min"
+  },
+  "Lost": {
+    "id": "tt0411008",
+    "imdbName": "Lost",
+    "imdbYear": "2004–2010",
+    "rating": "8.3",
+    "runtime": "44 min"
+  },
+  "Homeland": {
+    "id": "tt1796960",
+    "imdbName": "Homeland",
+    "imdbYear": "2011–2020",
+    "rating": "8.3",
+    "runtime": "53 min"
+  },
+  "House": {
+    "id": "tt0412142",
+    "imdbName": "House",
+    "imdbYear": "2004–2012",
+    "rating": "8.7",
+    "runtime": "44 min"
+  },
+  "Dead Like Me": {
+    "id": "tt0348913",
+    "imdbName": "Dead Like Me",
+    "imdbYear": "2003–2004",
+    "rating": "8.1",
+    "runtime": "56S min"
+  },
+  "Gangs of London": {
+    "id": "tt7661390",
+    "imdbName": "Gangs of London",
+    "imdbYear": "2020–",
+    "rating": "8.0",
+    "runtime": "54 min"
+  },
+  "Katla": {
+    "id": "tt11102190",
+    "imdbName": "Katla",
+    "imdbYear": "2021",
+    "rating": "7.0",
+    "runtime": "46 min"
+  },
+  "Kaleidoscope": {
+    "id": "tt15438246",
+    "imdbName": "Kaleidoscope",
+    "imdbYear": "2023",
+    "rating": "6.6",
+    "runtime": "47 min"
+  },
+  "The Glory": {
+    "id": "tt21344706",
+    "imdbName": "The Glory",
+    "imdbYear": "2022–2023",
+    "rating": "8.2",
+    "runtime": "53 min"
+  },
+  "Scissor Seven": {
+    "id": "tt10384610",
+    "imdbName": "Scissor Seven",
+    "imdbYear": "2018–",
+    "rating": "8.4",
+    "runtime": "16 min"
+  },
+  "Unbelievable": {
+    "id": "tt7909970",
+    "imdbName": "Unbelievable",
+    "imdbYear": "2019",
+    "rating": "8.3",
+    "runtime": "48 min"
+  },
+  "Murderbot": {
+    "id": "tt30444310",
+    "imdbName": "Murderbot",
+    "imdbYear": "2025–",
+    "rating": "7.4",
+    "runtime": "26 min"
+  }
+}

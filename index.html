@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Blind Reel — The Title Is the Twist</title>
-  <meta name="description" content="60 films and series, described only by their stories. Read the plot, feel the vibe, then hit reveal for the title, year and IMDb rating.">
+  <meta name="description" content="100 films and series — Hollywood, Bollywood and world cinema — described only by their stories. Read the plot, feel the vibe, then hit reveal for the title, year and IMDb rating.">
   <meta name="theme-color" content="#08090c">
   <meta name="color-scheme" content="dark">
   <link rel="canonical" href="https://ajeet-iitk.github.io/movie-theme1/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Blind Reel — The Title Is the Twist">
-  <meta property="og:description" content="60 films and series, described only by their stories. Fall for the plot, then reveal the title.">
+  <meta property="og:description" content="100 films and series — Hollywood, Bollywood and world cinema — described only by their stories. Fall for the plot, then reveal the title.">
   <meta property="og:url" content="https://ajeet-iitk.github.io/movie-theme1/">
   <meta property="og:image" content="https://ajeet-iitk.github.io/movie-theme1/assets/img/og.png">
   <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
   <meta property="og:image:alt" content="Blind Reel — Fall for the story. Then meet the title.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Blind Reel — The Title Is the Twist">
-  <meta name="twitter:description" content="60 films and series, described only by their stories. Fall for the plot, then reveal the title.">
+  <meta name="twitter:description" content="100 films and series — Hollywood, Bollywood and world cinema — described only by their stories. Fall for the plot, then reveal the title.">
   <meta name="twitter:image" content="https://ajeet-iitk.github.io/movie-theme1/assets/img/og.png">
 
   <script>document.documentElement.classList.add("js");</script>
@@ -31,6 +31,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/api.js" defer></script>
   <script src="assets/js/app.js" defer></script>
 </head>
 <body>
@@ -106,11 +107,12 @@
       </a>
       <nav class="header-nav" aria-label="Primary">
         <a href="#watchlist">The watchlist</a>
+        <a href="#liveBand">Live picks</a>
         <a href="#how">How it works</a>
       </nav>
       <div class="header-actions">
         <div class="header-progress" title="Titles revealed">
-          <span class="header-progress-label"><b id="headerCount">0</b> / <span id="headerTotal">60</span></span>
+          <span class="header-progress-label"><b id="headerCount">0</b> / <span id="headerTotal">100</span></span>
           <span class="header-progress-track"><i id="headerBar"></i></span>
         </div>
         <button class="btn btn-small btn-primary" id="headerSurprise" type="button" aria-label="Surprise me with a random story">
@@ -128,7 +130,7 @@
         <div class="hero-copy">
           <p class="eyebrow"><span class="pulse-dot" aria-hidden="true"></span> A spoiler-free movie club</p>
           <h1>Fall for the <span class="serif-accent">story</span>.<br>Then meet the<br><span class="title-accent">title</span>.</h1>
-          <p class="hero-lede">No posters. No trailers. No names. Just 60 storylines — cheesy, devastating, and dangerously rewatchable — hiding some of the best films and series ever made.</p>
+          <p class="hero-lede">No posters. No trailers. No names. Just <span data-count="total">100</span> storylines — cheesy, devastating, and dangerously rewatchable — hiding the best of Hollywood, Bollywood and world cinema.</p>
           <div class="hero-actions">
             <button class="btn btn-primary btn-large" id="heroSurprise" type="button">
               <svg class="icon" aria-hidden="true"><use href="#i-dice"/></svg>
@@ -140,8 +142,8 @@
             </a>
           </div>
           <dl class="hero-stats">
-            <div><dt>Stories</dt><dd>60</dd></div>
-            <div><dt>Series</dt><dd>12</dd></div>
+            <div><dt>Stories</dt><dd data-count="total">100</dd></div>
+            <div><dt>Series</dt><dd data-count="series">20</dd></div>
             <div><dt>Spoilers</dt><dd>0</dd></div>
           </dl>
         </div>
@@ -162,7 +164,7 @@
                 <div class="redact redact-3"></div>
                 <span class="poster-tag">TITLE CLASSIFIED</span>
               </div>
-              <div class="poster-footer"><span>60 STORIES</span><span>0 SPOILERS</span></div>
+              <div class="poster-footer"><span>100 STORIES</span><span>0 SPOILERS</span></div>
             </div>
             <div class="poster-chip chip-rating"><svg class="icon"><use href="#i-star"/></svg> 8.3</div>
             <div class="poster-chip chip-note">NO SPOILERS</div>
@@ -208,20 +210,22 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">The blind watchlist</p>
-            <h2 id="watchlistTitle">60 stories. <span class="serif-accent">Zero</span> titles.</h2>
+            <h2 id="watchlistTitle"><span data-count="total">100</span> stories. <span class="serif-accent">Zero</span> titles.</h2>
           </div>
           <p class="section-note">Hand-picked from a very long, very chaotic watchlist. Filter by feeling, not genre snobbery.</p>
         </div>
 
         <div class="filter-shell">
           <div class="filter-top">
-            <div class="segmented" role="group" aria-label="Filter by type">
-              <button type="button" class="seg-btn is-active" data-type="all" aria-pressed="true">All <span id="countAll">60</span></button>
-              <button type="button" class="seg-btn" data-type="movie" aria-pressed="false">Movies <span id="countMovies">48</span></button>
-              <button type="button" class="seg-btn" data-type="series" aria-pressed="false">Series <span id="countSeries">12</span></button>
+            <div class="segmented" role="group" aria-label="Filter by type or collection">
+              <button type="button" class="seg-btn is-active" data-type="all" aria-pressed="true">All <span data-count="total">100</span></button>
+              <button type="button" class="seg-btn" data-type="movie" aria-pressed="false">Movies <span data-count="movies">80</span></button>
+              <button type="button" class="seg-btn" data-type="series" aria-pressed="false">Series <span data-count="series">20</span></button>
+              <button type="button" class="seg-btn" data-type="bollywood" aria-pressed="false">Bollywood <span data-count="bollywood">36</span></button>
+              <button type="button" class="seg-btn" data-type="world" aria-pressed="false">World <span data-count="world">7</span></button>
             </div>
             <div class="progress-wrap" aria-live="polite">
-              <span id="progressText">0 of 60 revealed</span>
+              <span id="progressText">0 of 100 revealed</span>
               <span class="progress-track"><i id="progressBar"></i></span>
             </div>
           </div>
@@ -229,7 +233,7 @@
         </div>
 
         <div class="results-line">
-          <span id="resultsCount">Showing 60 stories</span>
+          <span id="resultsCount">Showing 100 stories</span>
           <button class="text-btn" id="resetBtn" type="button" hidden>
             <svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg> Reset the mystery
           </button>
@@ -239,7 +243,7 @@
           <div class="empty-state">
             <span class="empty-mark">?</span>
             <h3>The titles are hiding behind JavaScript.</h3>
-            <p>Enable JavaScript to load the 60 stories and the reveal buttons.</p>
+            <p>Enable JavaScript to load the 100 stories and the reveal buttons.</p>
           </div>
         </noscript>
         <div class="grid" id="grid"></div>
@@ -250,6 +254,26 @@
           <p>Try another filter — or let the dice decide.</p>
           <button class="btn btn-primary" type="button" id="emptySurprise">Surprise me</button>
         </div>
+      </div>
+    </section>
+
+    <section class="live-band" id="liveBand" aria-labelledby="liveTitle" hidden>
+      <div class="section-inner">
+        <div class="live-head">
+          <div class="live-copy">
+            <p class="eyebrow"><span class="pulse-dot" aria-hidden="true"></span> Live from IMDb</p>
+            <h2 id="liveTitle">Fresh off the <span class="serif-accent">catalogue</span>.</h2>
+            <p class="live-note">Pulled at runtime from a keyless public API, so this shelf keeps growing without a redeploy. Same rules apply: the title stays hidden.</p>
+          </div>
+          <div class="live-actions">
+            <span class="live-status" id="liveStatus" role="status" aria-live="polite">Connecting…</span>
+            <button class="btn btn-ghost btn-small" id="liveMore" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg>
+              Load more
+            </button>
+          </div>
+        </div>
+        <div class="grid live-grid" id="liveGrid"></div>
       </div>
     </section>
 
@@ -298,7 +322,7 @@
         <a href="#top">Back to top <svg class="icon" aria-hidden="true"><use href="#i-arrow-up"/></svg></a>
       </div>
       <div class="footer-fine">
-        <p>Ratings via IMDb. Storylines are original, spoiler-light descriptions. Personal, non-commercial fan project.</p>
+        <p>Ratings via IMDb. Storylines are original, spoiler-light descriptions. The live shelf is fetched at runtime from Cinemeta, a keyless public IMDb mirror. Personal, non-commercial fan project.</p>
         <p>© <span id="year">2026</span> Blind Reel · Made with too many tabs open.</p>
       </div>
     </div>

@@ -1922,6 +1922,121 @@ figure {
   to { opacity: 1; transform: none; }
 }
 
+@keyframes pickGlow {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); }
+  55% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent), 0 0 44px color-mix(in srgb, var(--accent) 28%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes pickNudge {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+  60% { transform: translateY(2px); }
+}
+
+/* Collections and live shelf ---------------------------------------------- */
+.tag-sector {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: color-mix(in srgb, var(--accent) 88%, #fff);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.tag-world {
+  --accent: var(--sky);
+}
+
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.22rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--mint) 42%, transparent);
+  border-radius: 999px;
+  color: var(--mint);
+  font-size: 0.54rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.live-pill::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: livePulse 2.2s ease-in-out infinite;
+}
+
+.card.is-picked {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  animation: pickNudge 0.9s var(--ease), pickGlow 3.1s ease-out;
+}
+
+.card-live {
+  background:
+    linear-gradient(180deg, rgba(127, 231, 212, 0.05), rgba(255, 255, 255, 0.008)),
+    rgba(12, 14, 19, 0.55);
+}
+
+.live-band {
+  padding: 74px 0 10px;
+}
+
+.live-band[hidden] {
+  display: none;
+}
+
+.live-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 22px;
+}
+
+.live-copy h2 {
+  margin-top: 10px;
+  font-size: clamp(1.9rem, 3.4vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.live-note {
+  max-width: 46ch;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.live-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 4px;
+  white-space: nowrap;
+}
+
+.live-status {
+  color: var(--muted-2);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-grid {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+
 /* Responsive -------------------------------------------------------------- */
 @media (max-width: 1080px) {
   .hero-inner {
@@ -2151,12 +2266,21 @@ figure {
 
   .segmented {
     width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
+  }
+
+  .segmented::-webkit-scrollbar {
+    display: none;
   }
 
   .seg-btn {
-    flex: 1;
+    flex: 0 0 auto;
     justify-content: center;
-    padding: 0.55rem 0.5rem;
+    padding: 0.55rem 0.72rem;
   }
 
   .progress-wrap {
@@ -2200,6 +2324,27 @@ figure {
   .grid {
     grid-template-columns: 1fr;
     gap: 13px;
+  }
+
+  .live-band {
+    padding-top: 54px;
+  }
+
+  .live-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .live-actions {
+    width: 100%;
+    justify-content: space-between;
+    padding-bottom: 0;
+  }
+
+  .live-status {
+    font-size: 0.6rem;
+    white-space: normal;
   }
 
   .card {
@@ -2256,7 +2401,9 @@ figure {
   .toast {
     bottom: 16px;
     max-width: calc(100% - 32px);
-    white-space: nowrap;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.45;
   }
 
   .to-top {
