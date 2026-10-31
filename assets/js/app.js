@@ -647,6 +647,8 @@
     document.getElementById("heroSurprise").addEventListener("click", surprise);
     document.getElementById("ctaSurprise").addEventListener("click", surprise);
     document.getElementById("emptySurprise").addEventListener("click", surprise);
+    const boredSurprise = document.getElementById("boredSurprise");
+    if (boredSurprise) boredSurprise.addEventListener("click", surprise);
 
     if (els.liveMore) {
       els.liveMore.addEventListener("click", () => loadLive({ more: true }));

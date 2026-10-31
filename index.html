@@ -29,10 +29,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=20261031">
-  <script src="assets/js/data.js?v=20261031" defer></script>
-  <script src="assets/js/api.js?v=20261031" defer></script>
-  <script src="assets/js/app.js?v=20261031" defer></script>
+  <link rel="stylesheet" href="assets/css/style.css?v=20261031b">
+  <script src="assets/js/data.js?v=20261031b" defer></script>
+  <script src="assets/js/api.js?v=20261031b" defer></script>
+  <script src="assets/js/app.js?v=20261031b" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#watchlist">Skip to the watchlist</a>
@@ -202,6 +202,30 @@
             <p>Get the title, year, IMDb rating, runtime, cast, and the one-line reason it will live in your head rent-free.</p>
           </li>
         </ol>
+      </div>
+    </section>
+
+    <section class="bored-band" aria-labelledby="boredTitle">
+      <div class="section-inner">
+        <div class="bored-inner">
+          <div class="bored-question">
+            <p class="bored-kicker"><span class="pulse-dot" aria-hidden="true"></span> The 9 p.m. problem</p>
+            <h2 id="boredTitle">Are you <em>bored</em>?<br>And can’t decide<br>what to watch?</h2>
+          </div>
+          <div class="bored-answer">
+            <p>Let us help pick you something to watch by the <em>cheesy plot</em> of the movie or series.</p>
+            <div class="bored-actions">
+              <button class="btn btn-primary" id="boredSurprise" type="button">
+                <svg class="icon" aria-hidden="true"><use href="#i-dice"/></svg>
+                Pick one for me
+              </button>
+              <a class="bored-link" href="#watchlist">
+                Or browse all <span data-count="total">100</span>
+                <svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 

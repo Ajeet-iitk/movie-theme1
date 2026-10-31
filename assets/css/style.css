@@ -949,7 +949,7 @@ figure {
 
 /* Watchlist --------------------------------------------------------------- */
 .watchlist {
-  padding: clamp(66px, 8vw, 104px) 0 30px;
+  padding: clamp(46px, 5vw, 72px) 0 30px;
 }
 
 .section-head {
@@ -2037,6 +2037,120 @@ figure {
   50% { opacity: 0.35; transform: scale(0.7); }
 }
 
+/* Bored band -------------------------------------------------------------- */
+.bored-band {
+  position: relative;
+  padding: clamp(54px, 7vw, 88px) 0 0;
+}
+
+.bored-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: clamp(26px, 4.5vw, 64px);
+  padding: clamp(28px, 4vw, 46px) clamp(22px, 3.6vw, 44px);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 6px);
+  background:
+    radial-gradient(680px 260px at 6% 0%, rgba(245, 196, 81, 0.12), transparent 66%),
+    radial-gradient(520px 260px at 98% 112%, rgba(255, 122, 89, 0.08), transparent 62%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.008));
+  overflow: hidden;
+}
+
+.bored-inner::after {
+  content: "?";
+  position: absolute;
+  right: 30px;
+  bottom: -6px;
+  color: rgba(245, 196, 81, 0.055);
+  font-family: var(--serif);
+  font-size: clamp(150px, 17vw, 235px);
+  font-style: italic;
+  line-height: 0.95;
+  pointer-events: none;
+  user-select: none;
+}
+
+.bored-question,
+.bored-answer {
+  position: relative;
+  z-index: 1;
+}
+
+.bored-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.bored-question h2 {
+  margin-top: 14px;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 3.8vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+.bored-question h2 em {
+  padding-right: 0.04em;
+  color: var(--amber);
+  font-style: italic;
+}
+
+.bored-answer {
+  padding-left: clamp(20px, 3vw, 38px);
+  border-left: 1px solid var(--line);
+}
+
+.bored-answer p {
+  max-width: 36ch;
+  color: var(--text-soft);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.bored-answer p em {
+  color: var(--amber);
+  font-family: var(--serif);
+  font-size: 1.1em;
+  font-style: italic;
+}
+
+.bored-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+  margin-top: 22px;
+}
+
+.bored-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+
+.bored-link:hover {
+  color: var(--text);
+}
+
+.bored-link .icon {
+  width: 13px;
+  height: 13px;
+}
+
 /* Responsive -------------------------------------------------------------- */
 @media (max-width: 1080px) {
   .hero-inner {
@@ -2272,7 +2386,7 @@ figure {
   }
 
   .watchlist {
-    padding-top: 62px;
+    padding-top: 44px;
   }
 
   .section-head h2 {
@@ -2355,6 +2469,34 @@ figure {
 
   .live-band {
     padding-top: 54px;
+  }
+
+  .bored-band {
+    padding-top: 42px;
+  }
+
+  .bored-inner {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 26px 20px 28px;
+    border-radius: 20px;
+  }
+
+  .bored-question h2 {
+    font-size: clamp(1.8rem, 7.6vw, 2.4rem);
+  }
+
+  .bored-answer {
+    padding-left: 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .bored-inner::after {
+    right: -16px;
+    bottom: -18px;
+    font-size: 150px;
   }
 
   .live-head {
