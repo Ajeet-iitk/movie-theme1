@@ -8,6 +8,7 @@
   const SERIES_COUNT = FILMS.filter((film) => film.type === "series").length;
   const STORAGE_KEY = "blindReel.revealed.v1";
   const ACCENTS = ["#f5c451", "#ff7a59", "#7fe7d4", "#b8a1ff", "#7cc7ff", "#ff9ec4"];
+  const SECTOR_LABEL = { hollywood: "Hollywood", bollywood: "Bollywood", world: "World" };
 
   const MOODS = [
     { key: "all", label: "All moods" },
@@ -47,10 +48,17 @@
     toTop: document.getElementById("toTop"),
     header: document.getElementById("siteHeader"),
     scrollBar: document.getElementById("scrollBar"),
+    seeMore: document.getElementById("seeMore"),
+    seeMoreWrap: document.getElementById("seeMoreWrap"),
+    seeMoreCount: document.getElementById("seeMoreCount"),
     liveBand: document.getElementById("liveBand"),
     liveGrid: document.getElementById("liveGrid"),
     liveStatus: document.getElementById("liveStatus"),
-    liveMore: document.getElementById("liveMore")
+    liveMore: document.getElementById("liveMore"),
+    bollyBand: document.getElementById("bollyBand"),
+    bollyGrid: document.getElementById("bollyGrid"),
+    bollyStatus: document.getElementById("bollyStatus"),
+    bollyMore: document.getElementById("bollyMore")
   };
 
   const state = {
@@ -58,14 +66,19 @@
     mood: "all",
     revealed: loadRevealed(),
     toastTimer: 0,
-    lastPick: ""
+    lastPick: "",
+    limit: 0
   };
 
   let cards = [];
   let observer = null;
   let toastId = 0;
   let panelSeq = 0;
+  let compact = false;
+  let lastScrollY = window.scrollY;
+  let offsetTimer = 0;
   const liveIds = new Set();
+  const bollyIds = new Set();
 
   /* -------------------------------------------------------------------------
      Helpers
@@ -150,6 +163,7 @@
       total: TOTAL,
       movies: MOVIE_COUNT,
       series: SERIES_COUNT,
+      hollywood: FILMS.filter((film) => film.sector === "hollywood").length,
       bollywood: FILMS.filter((film) => film.sector === "bollywood").length,
       world: FILMS.filter((film) => film.sector === "world").length
     };
@@ -158,6 +172,14 @@
       const key = node.dataset.count;
       if (counts[key] !== undefined) node.textContent = counts[key];
     });
+  }
+
+  /* How many cards to paint per page. Keeps the page short on phones and
+     stops a hundred-odd tiles from becoming an endless scroll. */
+  function pageSize() {
+    if (window.innerWidth <= 560) return 6;
+    if (window.innerWidth <= 900) return 9;
+    return 12;
   }
 
   /* -------------------------------------------------------------------------
@@ -176,9 +198,30 @@
   while (seriesPool.length) ordered.push(seriesPool.shift());
 
   function sectorTag(film) {
-    if (film.sector === "bollywood") return `<span class="tag tag-sector">Bollywood</span>`;
-    if (film.sector === "world") return `<span class="tag tag-sector tag-world">World</span>`;
-    return "";
+    if (!film.sector) return "";
+    const label = SECTOR_LABEL[film.sector];
+    if (!label) return "";
+    return `<span class="tag tag-sector tag-${esc(film.sector)}">${label}</span>`;
+  }
+
+  function ottRow(film, live) {
+    const search = `https://www.justwatch.com/in/search?q=${encodeURIComponent(film.title)}`;
+    const chips = (film.ott || [])
+      .map((platform) => `<span class="ott-chip">${esc(platform)}</span>`)
+      .join("");
+
+    if (live) {
+      return `<div class="reveal-ott">
+        <span class="ott-label">Where to watch</span>
+        <a class="ott-link" href="${search}" target="_blank" rel="noopener">Check JustWatch <svg class="icon" aria-hidden="true"><use href="#i-arrow-out"/></svg></a>
+      </div>`;
+    }
+
+    return `<div class="reveal-ott">
+      <span class="ott-label">Where to watch${chips ? " · India" : ""}</span>
+      <div class="ott-chips">${chips || `<span class="ott-none">Availability varies</span>`}</div>
+      <a class="ott-link" href="${search}" target="_blank" rel="noopener">JustWatch <svg class="icon" aria-hidden="true"><use href="#i-arrow-out"/></svg></a>
+    </div>`;
   }
 
   function cardMarkup(film, position, options = {}) {
@@ -195,7 +238,7 @@
     const rating = Number(film.rating);
 
     return `
-      <article class="card${live ? " card-live" : ""}" data-title="${esc(film.title)}" data-type="${film.type}" data-sector="${esc(film.sector || "global")}" data-imdb="${esc(film.imdb || "")}" data-moods="${film.moods.join(" ")}" style="--accent:${accent}">
+      <article class="card${live ? " card-live" : ""}" data-title="${esc(film.title)}" data-type="${film.type}" data-sector="${esc(film.sector || "")}" data-imdb="${esc(film.imdb || "")}" data-moods="${film.moods.join(" ")}" style="--accent:${accent}">
         <div class="confetti" aria-hidden="true"></div>
         <div class="card-top">
           <span class="card-type${film.type === "series" ? " is-series" : ""}">
@@ -236,6 +279,7 @@
                   <span><b>${esc(film.creditLabel)}</b> ${esc(film.director)}</span>
                   <span><b>Starring</b> ${esc(film.cast)}</span>
                 </div>
+                ${ottRow(film, live)}
               </div>
             </div>
           </div>
@@ -408,7 +452,7 @@
   }
 
   /* -------------------------------------------------------------------------
-     Filters
+     Filters + paging
      ------------------------------------------------------------------------- */
 
   function setType(type) {
@@ -437,16 +481,28 @@
     return card.dataset.sector === state.type;
   }
 
+  function matchesMood(card) {
+    return state.mood === "all" || card.dataset.moods.split(" ").includes(state.mood);
+  }
+
+  function matchingCards() {
+    return cards.filter((card) => matchesType(card) && matchesMood(card));
+  }
+
   function applyFilters() {
-    let visible = 0;
+    const matched = matchingCards();
+    const matchSet = new Set(matched);
+    const limit = Math.max(state.limit, pageSize());
+    const shown = Math.min(limit, matched.length);
 
     cards.forEach((card) => {
-      const moodMatch = state.mood === "all" || card.dataset.moods.split(" ").includes(state.mood);
-      const show = matchesType(card) && moodMatch;
-      card.hidden = !show;
+      card.hidden = !matchSet.has(card);
+    });
 
-      if (show) {
-        visible += 1;
+    matched.forEach((card, index) => {
+      const pagedOut = index >= limit;
+      card.classList.toggle("is-paged-out", pagedOut);
+      if (!pagedOut) {
         const rect = card.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
           card.classList.add("is-visible");
@@ -454,14 +510,30 @@
       }
     });
 
-    els.results.textContent = `Showing ${visible} ${visible === 1 ? "story" : "stories"}`;
-    els.empty.hidden = visible !== 0;
-    els.grid.hidden = visible === 0;
+    if (!matched.length) {
+      els.results.textContent = "No stories match";
+    } else if (shown === matched.length) {
+      els.results.textContent = `Showing all ${matched.length} ${matched.length === 1 ? "story" : "stories"}`;
+    } else {
+      els.results.textContent = `Showing ${shown} of ${matched.length} stories`;
+    }
+
+    els.empty.hidden = matched.length !== 0;
+    els.grid.hidden = matched.length === 0;
+
+    if (els.seeMoreWrap) {
+      const remaining = matched.length - shown;
+      els.seeMoreWrap.hidden = remaining <= 0;
+      if (remaining > 0) {
+        els.seeMoreCount.textContent = `${remaining} more`;
+      }
+    }
   }
 
   function resetFilters() {
     setType("all");
     setMood("all");
+    state.limit = pageSize();
     applyFilters();
   }
 
@@ -485,16 +557,18 @@
      ------------------------------------------------------------------------- */
 
   function surprise() {
-    const visible = cards.filter((card) => !card.hidden && !state.revealed.has(card.dataset.title));
-    let pool = visible.filter((card) => card.dataset.title !== state.lastPick);
+    let matched = matchingCards();
+    let unrevealed = matched.filter((card) => !state.revealed.has(card.dataset.title));
+    let pool = unrevealed.filter((card) => card.dataset.title !== state.lastPick);
 
-    if (!pool.length) pool = visible;
-    if (pool.length === 1 && pool[0].dataset.title === state.lastPick) pool = visible;
+    if (!pool.length) pool = unrevealed;
 
     if (!pool.length) {
-      const unrevealed = cards.filter((card) => !state.revealed.has(card.dataset.title));
-      if (unrevealed.length) {
+      const allUnrevealed = cards.filter((card) => !state.revealed.has(card.dataset.title));
+      if (allUnrevealed.length) {
         resetFilters();
+        matched = matchingCards();
+        unrevealed = allUnrevealed;
         pool = unrevealed.filter((card) => card.dataset.title !== state.lastPick);
         if (!pool.length) pool = unrevealed;
       }
@@ -517,15 +591,72 @@
 
     const card = randomFrom(pool);
     state.lastPick = card.dataset.title;
-    card.hidden = false;
+
+    // The pick may be sitting behind the "see more" fold — open enough pages.
+    const index = matched.indexOf(card);
+    if (index >= state.limit) {
+      state.limit = index + 1;
+      applyFilters();
+    }
+
     scrollToCard(card);
     spotlight(card);
     showToast("Mystery pick. The title stays sealed.");
   }
 
   /* -------------------------------------------------------------------------
+     Collapsing header
+     ------------------------------------------------------------------------- */
+
+  function syncStickyOffsets() {
+    const bottom = Math.round(els.header.getBoundingClientRect().bottom);
+    const root = document.documentElement;
+    // Sticky filter and anchor jumps both hang off the real header height,
+    // because the header shrinks when the nav collapses.
+    root.style.setProperty("--filter-top", `${bottom + 8}px`);
+    root.style.setProperty("--scroll-pad", `${bottom + 18}px`);
+  }
+
+  function setCompact(on) {
+    if (on === compact) return;
+    compact = on;
+    els.header.classList.toggle("is-compact", on);
+    const nav = els.header.querySelector(".header-nav");
+    if (nav) nav.setAttribute("aria-hidden", on ? "true" : "false");
+    syncStickyOffsets();
+    window.requestAnimationFrame(syncStickyOffsets);
+    // The header is mid-transition right now; measure again once it settles.
+    window.clearTimeout(offsetTimer);
+    offsetTimer = window.setTimeout(syncStickyOffsets, 400);
+  }
+
+  /* -------------------------------------------------------------------------
      Live catalogue (Cinemeta, keyless)
      ------------------------------------------------------------------------- */
+
+  function appendLive(grid, items, idSet, isBolly) {
+    const start = grid.children.length;
+    const html = items
+      .map((film, index) => {
+        idSet.add(film.id);
+        return cardMarkup(film, start + index, { live: true });
+      })
+      .join("");
+
+    grid.insertAdjacentHTML("beforeend", html);
+    const fresh = [...grid.querySelectorAll(".card")].slice(start);
+    fresh.forEach((card) => {
+      if (state.revealed.has(card.dataset.title)) {
+        setRevealed(card, true, { celebrate: false, toast: false });
+      }
+    });
+    observe(fresh);
+    return fresh.length;
+  }
+
+  function curatedImdbIds() {
+    return FILMS.map((film) => film.imdb).filter(Boolean);
+  }
 
   async function loadLive(options = {}) {
     const { force = false, more = false } = options;
@@ -538,7 +669,7 @@
     try {
       const items = await api.fresh({
         count: more ? 3 : 6,
-        exclude: [...FILMS.map((film) => film.imdb), ...liveIds],
+        exclude: [...curatedImdbIds(), ...liveIds],
         force
       });
 
@@ -548,27 +679,45 @@
         return;
       }
 
-      const start = els.liveGrid.children.length;
-      const html = items.map((film, index) => {
-        liveIds.add(film.id);
-        return cardMarkup(film, start + index, { live: true });
-      }).join("");
-
-      els.liveGrid.insertAdjacentHTML("beforeend", html);
+      appendLive(els.liveGrid, items, liveIds, false);
       els.liveBand.hidden = false;
-
-      const fresh = [...els.liveGrid.querySelectorAll(".card")].slice(start);
-      fresh.forEach((card) => {
-        if (state.revealed.has(card.dataset.title)) {
-          setRevealed(card, true, { celebrate: false, toast: false });
-        }
-      });
-      observe(fresh);
 
       els.liveStatus.textContent = `${liveIds.size} added live · refreshed just now`;
       if (els.liveMore) els.liveMore.disabled = false;
     } catch (error) {
       els.liveStatus.textContent = "Live catalogue unavailable — the curated list still works.";
+    }
+  }
+
+  /* Fresh Hindi releases, discovered through Wikipedia and hydrated by IMDb. */
+  async function loadBolly(options = {}) {
+    const { more = false, force = false } = options;
+    const api = window.BlindReelAPI;
+
+    if (!api || !els.bollyGrid) return;
+
+    if (!more) els.bollyStatus.textContent = "Looking for new releases…";
+
+    try {
+      const items = await api.bollywoodFresh({
+        count: more ? 3 : 6,
+        exclude: [...curatedImdbIds(), ...bollyIds],
+        force
+      });
+
+      if (!items.length) {
+        els.bollyStatus.textContent = "No new Hindi releases found right now.";
+        if (els.bollyMore) els.bollyMore.disabled = true;
+        return;
+      }
+
+      appendLive(els.bollyGrid, items, bollyIds, true);
+      els.bollyBand.hidden = false;
+
+      els.bollyStatus.textContent = `${bollyIds.size} new releases · checked just now`;
+      if (els.bollyMore) els.bollyMore.disabled = false;
+    } catch (error) {
+      els.bollyStatus.textContent = "Live Bollywood shelf unavailable — the curated list still works.";
     }
   }
 
@@ -583,7 +732,7 @@
         document.querySelectorAll(`.card[data-imdb="${imdb}"]`).forEach((card) => {
           const ratingNode = card.querySelector(".rating-value");
           if (ratingNode && meta.rating) ratingNode.textContent = meta.rating.toFixed(1);
-          const runtimeNode = card.querySelector(".runtime-value");
+          const runtimeNode = card.querySelector(".runtime-node, .runtime-value");
           if (runtimeNode && meta.runtime) runtimeNode.textContent = meta.runtime;
         });
       });
@@ -600,6 +749,7 @@
     document.querySelectorAll(".seg-btn").forEach((button) => {
       button.addEventListener("click", () => {
         setType(button.dataset.type);
+        state.limit = pageSize();
         applyFiltersAndReturn();
       });
     });
@@ -608,8 +758,16 @@
       const button = event.target.closest(".mood-chip");
       if (!button) return;
       setMood(button.dataset.mood);
+      state.limit = pageSize();
       applyFiltersAndReturn();
     });
+
+    if (els.seeMore) {
+      els.seeMore.addEventListener("click", () => {
+        state.limit += pageSize();
+        applyFilters();
+      });
+    }
 
     // Delegated so live cards work too.
     document.addEventListener("click", (event) => {
@@ -654,6 +812,10 @@
       els.liveMore.addEventListener("click", () => loadLive({ more: true }));
     }
 
+    if (els.bollyMore) {
+      els.bollyMore.addEventListener("click", () => loadBolly({ more: true }));
+    }
+
     els.resetBtn.addEventListener("click", () => {
       const confirmed = window.confirm(`Hide all ${TOTAL} titles and start the mystery over?`);
       if (!confirmed) return;
@@ -682,22 +844,44 @@
         els.scrollBar.style.width = `${ratio * 100}%`;
         els.header.classList.toggle("is-scrolled", scrollTop > 18);
         els.toTop.classList.toggle("is-show", scrollTop > 620);
+
+        // Collapse the section links while reading downward, bring them back
+        // the moment the visitor scrolls up.
+        if (scrollTop > lastScrollY + 5 && scrollTop > 200) {
+          setCompact(true);
+        } else if (scrollTop < lastScrollY - 5 || scrollTop < 130) {
+          setCompact(false);
+        }
+        lastScrollY = scrollTop;
       },
       { passive: true }
     );
+
+    window.addEventListener("resize", () => {
+      if (state.limit < pageSize()) state.limit = pageSize();
+      applyFilters();
+      syncStickyOffsets();
+    });
+
+    // Load the live shelves shortly after first paint. They are below the
+    // fold, so this never blocks the curated catalogue.
+    window.setTimeout(() => loadBolly(), 500);
+    window.setTimeout(() => loadLive(), 1400);
+    window.addEventListener("load", syncStickyOffsets);
   }
 
   /* -------------------------------------------------------------------------
      Boot
      ------------------------------------------------------------------------- */
 
+  state.limit = pageSize();
   fillCounts();
   renderMoodChips();
   render();
   bindEvents();
   applyFilters();
   updateProgress();
+  syncStickyOffsets();
 
   hydrate();
-  loadLive();
 })();

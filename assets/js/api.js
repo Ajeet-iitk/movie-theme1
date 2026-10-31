@@ -13,12 +13,15 @@ window.BlindReelAPI = (() => {
   "use strict";
 
   const CINEMETA = "https://v3-cinemeta.strem.io";
-  const CACHE_KEY = "blindReel.api.v3";
+  const WIKI = "https://en.wikipedia.org/w/api.php";
+  const WIKIDATA = "https://www.wikidata.org/w/api.php";
+  const CACHE_KEY = "blindReel.api.v4";
   const META_TTL = 7 * 24 * 60 * 60 * 1000; // refresh ratings weekly
   const LIVE_TTL = 6 * 60 * 60 * 1000; // refresh the live rail every 6 hours
+  const BOLLY_TTL = 6 * 60 * 60 * 1000; // refresh the Bollywood shelf every 6 hours
   const TIMEOUT = 9000;
 
-  const EMPTY = { meta: {}, live: null };
+  const EMPTY = { meta: {}, live: null, bollywood: null };
 
   let cache = load();
 
@@ -27,7 +30,11 @@ window.BlindReelAPI = (() => {
       const raw = localStorage.getItem(CACHE_KEY);
       const parsed = raw ? JSON.parse(raw) : null;
       if (!parsed || typeof parsed !== "object") return { ...EMPTY };
-      return { meta: parsed.meta || {}, live: parsed.live || null };
+      return {
+        meta: parsed.meta || {},
+        live: parsed.live || null,
+        bollywood: parsed.bollywood || null
+      };
     } catch (error) {
       return { ...EMPTY };
     }
@@ -90,6 +97,7 @@ window.BlindReelAPI = (() => {
       director: first(meta.director),
       description: meta.description || "",
       country: first(meta.country),
+      released: meta.released || "",
       status: meta.status || "",
       at: Date.now()
     };
@@ -253,5 +261,161 @@ window.BlindReelAPI = (() => {
     return items.filter((item) => !skip.has(item.id)).slice(0, count);
   }
 
-  return { meta, refresh, fresh, moodsFor, pool };
+  /* -------------------------------------------------------------------------
+     Bollywood, fresh — discovery via Wikipedia, metadata via IMDb/Cinemeta.
+     Wikipedia's category API is the only keyless, CORS-open way to ask
+     "what Hindi films came out this year?", and Wikidata gives us the IMDb
+     ids in one batched call. Nothing here needs an API key.
+     ------------------------------------------------------------------------- */
+
+  function cleanWikiTitle(title) {
+    return String(title || "")
+      .replace(/\s*\((?:19|20)\d{2}\s+film\)\s*$/i, "")
+      .replace(/\s*\(film\)\s*$/i, "")
+      .trim();
+  }
+
+  async function wikiCategory(year) {
+    const url =
+      `${WIKI}?action=query&generator=categorymembers` +
+      `&gcmtitle=${encodeURIComponent(`Category:${year} Hindi-language films`)}` +
+      `&gcmtype=page&gcmlimit=30&prop=pageprops|extracts&exintro=1&explaintext=1` +
+      `&exlimit=20&format=json&origin=*`;
+    try {
+      const json = await getJSON(url);
+      const pages = Object.values((json.query && json.query.pages) || {});
+      return pages.filter((page) => page.ns === 0 && !/^List of/i.test(page.title));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  /* One batched Wikidata call for every P345 (IMDb id) in the batch. */
+  async function imdbIds(pages) {
+    const qs = pages
+      .map((page) => page.pageprops && page.pageprops.wikibase_item)
+      .filter(Boolean)
+      .slice(0, 40);
+    if (!qs.length) return {};
+
+    try {
+      const json = await getJSON(
+        `${WIKIDATA}?action=wbgetentities&ids=${qs.join("|")}&props=claims&format=json&origin=*`
+      );
+      const out = {};
+      Object.entries(json.entities || {}).forEach(([qid, entity]) => {
+        const claim = entity.claims && entity.claims.P345 && entity.claims.P345[0];
+        const value =
+          claim && claim.mainsnak && claim.mainsnak.datavalue && claim.mainsnak.datavalue.value;
+        if (value) out[qid] = value;
+      });
+      return out;
+    } catch (error) {
+      return {};
+    }
+  }
+
+  async function mapLimit(list, limit, fn) {
+    let cursor = 0;
+    const workers = Array.from({ length: Math.min(limit, list.length) }, async () => {
+      while (cursor < list.length) {
+        const index = cursor;
+        cursor += 1;
+        await fn(list[index]);
+      }
+    });
+    await Promise.all(workers);
+  }
+
+  function shuffle(list) {
+    const copy = list.slice();
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function bollyCard(meta, id) {
+    const year = parseInt(String(meta.year).replace(/[^\d].*$/, ""), 10) || null;
+    return {
+      id,
+      imdb: id,
+      title: meta.name,
+      year,
+      type: "movie",
+      sector: "bollywood",
+      live: true,
+      genres: meta.genres.length ? meta.genres : ["Drama"],
+      moods: moodsFor(meta.genres),
+      rating: meta.rating,
+      length: meta.runtime || "—",
+      creditLabel: "Directed by",
+      director: meta.director || "—",
+      cast: meta.cast || "—",
+      language: "Hindi",
+      ott: [],
+      story: logline(meta.description),
+      vibe: meta.rating
+        ? `New in Hindi cinema · ${meta.rating.toFixed(1)} on IMDb.`
+        : "New in Hindi cinema.",
+      releasedAt: Date.parse(meta.released) || 0
+    };
+  }
+
+  async function bollywoodPool(force = false) {
+    if (!force && cache.bollywood && Date.now() - cache.bollywood.at < BOLLY_TTL) {
+      return cache.bollywood.items;
+    }
+
+    const year = new Date().getFullYear();
+    const lists = await Promise.all([wikiCategory(year), wikiCategory(year - 1)]);
+    let pages = lists.flat();
+
+    if (pages.length < 10) {
+      pages = pages.concat(await wikiCategory(year - 2));
+    }
+
+    const seen = new Set();
+    const candidates = [];
+    pages.forEach((page) => {
+      const title = cleanWikiTitle(page.title);
+      if (!title || seen.has(title.toLowerCase())) return;
+      seen.add(title.toLowerCase());
+      candidates.push({ ...page, cleanTitle: title });
+    });
+
+    const batch = shuffle(candidates).slice(0, 18);
+    const idMap = await imdbIds(batch);
+    const items = [];
+
+    await mapLimit(batch, 5, async (page) => {
+      const imdb = idMap[page.pageprops && page.pageprops.wikibase_item];
+      if (!imdb) return;
+      const fresh = await meta(imdb, "movie");
+      if (!fresh) return;
+
+      const story = logline(fresh.description);
+      if (story.length < 45) return;
+
+      const card = bollyCard(fresh, imdb);
+      if (!card.title) return;
+      items.push(card);
+    });
+
+    items.sort((a, b) => b.releasedAt - a.releasedAt);
+    const shelf = items.slice(0, 16);
+
+    cache.bollywood = { at: Date.now(), items: shelf };
+    save();
+    return shelf;
+  }
+
+  async function bollywoodFresh({ count = 6, exclude = [], force = false } = {}) {
+    const items = await bollywoodPool(force);
+    const skip = new Set(exclude.filter(Boolean));
+    return items.filter((item) => !skip.has(item.id)).slice(0, count);
+  }
+
+  return { meta, refresh, fresh, bollywoodFresh, moodsFor, pool, bollywoodPool };
 })();

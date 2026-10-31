@@ -1,0 +1,128 @@
+{
+  "Jawan": {
+    "id": "tt15354916",
+    "name": "Jawan",
+    "year": "2023",
+    "rating": "6.9",
+    "runtime": "169 min"
+  },
+  "Pathaan": {
+    "id": "tt12844910",
+    "name": "Pathaan",
+    "year": "2023",
+    "rating": "5.8",
+    "runtime": "146 min"
+  },
+  "Animal": {
+    "id": "tt13751694",
+    "name": "Animal",
+    "year": "2023",
+    "rating": "6.2",
+    "runtime": "201 min"
+  },
+  "Drishyam 2": {
+    "id": "tt15501640",
+    "name": "Drishyam 2",
+    "year": "2022",
+    "rating": "8.2",
+    "runtime": "140 min"
+  },
+  "Article 15": {
+    "id": "tt10324144",
+    "name": "Article 15",
+    "year": "2019",
+    "rating": "8.1",
+    "runtime": "130 min"
+  },
+  "Shershaah": {
+    "id": "tt10295212",
+    "name": "Shershaah",
+    "year": "2021",
+    "rating": "8.3",
+    "runtime": "135 min"
+  },
+  "Sardar Udham": {
+    "id": "tt10280296",
+    "name": "Sardar Udham",
+    "year": "2021",
+    "rating": "8.3",
+    "runtime": "162 min"
+  },
+  "Monica O My Darling": {
+    "id": "tt15128068",
+    "name": "Monica, O My Darling",
+    "year": "2022",
+    "rating": "7.4",
+    "runtime": "129 min"
+  },
+  "Kill": {
+    "id": "tt28259207",
+    "name": "Kill",
+    "year": "2024",
+    "rating": "7.4",
+    "runtime": "105 min"
+  },
+  "Rocky Aur Rani Kii Prem Kahaani": {
+    "id": "tt14993250",
+    "name": "Rocky Aur Rani Kii Prem Kahaani",
+    "year": "2023",
+    "rating": "6.5",
+    "runtime": "178 min"
+  },
+  "Gangubai Kathiawadi": {
+    "id": "tt10083340",
+    "name": "Gangubai Kathiawadi",
+    "year": "2022",
+    "rating": "7.8",
+    "runtime": "157 min"
+  },
+  "Chandu Champion": {
+    "id": "tt27470893",
+    "name": "Chandu Champion",
+    "year": "2024",
+    "rating": "7.8",
+    "runtime": "143 min"
+  },
+  "Farzi": {
+    "id": "tt15477488",
+    "name": "Farzi",
+    "year": "2023–",
+    "rating": "8.3",
+    "runtime": "56 min"
+  },
+  "Delhi Crime": {
+    "id": "tt9398466",
+    "name": "Delhi Crime",
+    "year": "2019–",
+    "rating": "8.4",
+    "runtime": "48 min"
+  },
+  "Kohrra": {
+    "id": "tt27853283",
+    "name": "Kohrra",
+    "year": "2023–",
+    "rating": "7.5",
+    "runtime": "49 min"
+  },
+  "The Railway Men": {
+    "id": "tt16296870",
+    "name": "The Railway Men",
+    "year": "2023",
+    "rating": "8.5",
+    "runtime": "60 min"
+  },
+  "Rocket Boys": {
+    "id": "tt13868972",
+    "name": "Rocket Boys",
+    "year": "2022–",
+    "rating": "8.8",
+    "runtime": "44 min"
+  },
+  "Aarya": {
+    "id": "tt12448030",
+    "name": "Aarya",
+    "year": "2020–2024",
+    "rating": "7.7",
+    "runtime": "44 min"
+  }
+}

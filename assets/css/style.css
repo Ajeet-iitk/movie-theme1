@@ -25,6 +25,8 @@
   --max: 1240px;
   --radius: 20px;
   --header-h: 76px;
+  --filter-top: 76px;
+  --scroll-pad: 108px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -36,7 +38,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 108px;
+  scroll-padding-top: var(--scroll-pad, 108px);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -389,6 +391,12 @@ figure {
   align-items: center;
   gap: 26px;
   margin-inline: auto;
+  max-width: 560px;
+  overflow: hidden;
+  transition:
+    max-width 0.36s var(--ease),
+    opacity 0.26s ease,
+    transform 0.36s var(--ease);
 }
 
 .header-nav a {
@@ -397,6 +405,7 @@ figure {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 600;
+  white-space: nowrap;
   transition: color 0.2s ease;
 }
 
@@ -420,6 +429,15 @@ figure {
 .header-nav a:hover::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+
+/* De-clutter on scroll: the section links fold away so the bar becomes just
+   brand + progress + Surprise. Scrolling back up brings them home. */
+.site-header.is-compact .header-nav {
+  max-width: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
 }
 
 .header-actions {
@@ -980,7 +998,9 @@ figure {
 /* Filter bar -------------------------------------------------------------- */
 .filter-shell {
   position: sticky;
-  top: 68px;
+  /* Recomputed by app.js from the real header height, so it follows the
+     collapsing nav instead of guessing a breakpoint. */
+  top: var(--filter-top, 76px);
   z-index: 40;
   margin-bottom: 16px;
   padding: 12px 14px;
@@ -1135,6 +1155,77 @@ figure {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(318px, 1fr));
   gap: 16px;
+}
+
+/* Paging: cards stay in the DOM (so reveals, filters and Surprise keep
+   working) but only the first pages are painted. */
+.card.is-paged-out {
+  display: none;
+}
+
+/* See more --------------------------------------------------------------- */
+.see-more-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.see-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 22px 13px 24px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    transform 0.3s var(--ease);
+}
+
+.see-more:hover {
+  border-color: rgba(245, 196, 81, 0.4);
+  background: rgba(245, 196, 81, 0.07);
+  transform: translateY(-2px);
+}
+
+.see-more-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  line-height: 1.2;
+}
+
+.see-more-main strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.see-more-main small {
+  color: var(--muted-2);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.see-more .icon {
+  width: 15px;
+  height: 15px;
+  color: var(--amber);
+}
+
+.see-more-note {
+  color: rgba(242, 238, 228, 0.28);
+  font-size: 0.63rem;
+  letter-spacing: 0.04em;
 }
 
 .card {
@@ -1512,6 +1603,72 @@ figure {
 .reveal-credits b {
   color: var(--text-soft);
   font-weight: 700;
+}
+
+/* Where to watch */
+.reveal-ott {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.ott-label {
+  flex: 1 0 100%;
+  color: rgba(242, 238, 228, 0.34);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.ott-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ott-chip {
+  padding: 0.26rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  color: color-mix(in srgb, var(--accent) 82%, #fff);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+.ott-none {
+  color: var(--muted-2);
+  font-size: 0.66rem;
+  font-style: italic;
+}
+
+.ott-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.ott-link:hover {
+  color: var(--amber);
+}
+
+.ott-link .icon {
+  width: 11px;
+  height: 11px;
 }
 
 /* Confetti */
@@ -1936,13 +2093,23 @@ figure {
 
 /* Collections and live shelf ---------------------------------------------- */
 .tag-sector {
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  color: color-mix(in srgb, var(--accent) 88%, #fff);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+  color: color-mix(in srgb, var(--accent) 90%, #fff);
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+}
+
+/* Each collection gets a fixed colour, so Hollywood / Bollywood / World stay
+   recognisable no matter which accent the card was dealt. */
+.tag-hollywood {
+  --accent: var(--sky);
+}
+
+.tag-bollywood {
+  --accent: var(--coral);
 }
 
 .tag-world {
-  --accent: var(--sky);
+  --accent: var(--mint);
 }
 
 .live-pill {
@@ -1982,6 +2149,24 @@ figure {
 
 .live-band {
   padding: 74px 0 10px;
+}
+
+/* Bollywood, fresh — same shape as the live shelf, different accent. */
+.bolly-band {
+  padding: 74px 0 0;
+}
+
+.bolly-band .eyebrow {
+  color: var(--coral);
+}
+
+.bolly-band .pulse-dot {
+  background: var(--coral);
+  box-shadow: 0 0 0 4px rgba(255, 122, 89, 0.12);
+}
+
+.bolly-band[hidden] {
+  display: none;
 }
 
 .live-band[hidden] {
@@ -2238,7 +2423,7 @@ figure {
   }
 
   .filter-shell {
-    top: 66px;
+    top: var(--filter-top, 66px);
   }
 
   .footer-inner {
@@ -2252,7 +2437,7 @@ figure {
 
 @media (max-width: 720px) {
   html {
-    scroll-padding-top: 123px;
+    scroll-padding-top: var(--scroll-pad, 123px);
   }
 
   body {
@@ -2271,11 +2456,31 @@ figure {
     order: 3;
     flex: 1 0 100%;
     width: 100%;
+    max-width: none;
+    max-height: 52px;
     justify-content: space-between;
     gap: 10px;
     margin: 5px 0 0;
     padding: 7px 2px 0;
     border-top: 1px solid var(--line-soft);
+    transition:
+      max-height 0.34s var(--ease),
+      margin 0.34s var(--ease),
+      padding 0.34s var(--ease),
+      opacity 0.22s ease,
+      border-color 0.34s ease;
+  }
+
+  /* Collapsed on mobile means the second row physically disappears, so the
+     sticky filter follows it up via --filter-top. */
+  .site-header.is-compact .header-nav {
+    max-width: none;
+    max-height: 0;
+    margin-top: 0;
+    padding-top: 0;
+    border-top-color: transparent;
+    opacity: 0;
+    transform: none;
   }
 
   .header-nav a {
@@ -2394,7 +2599,7 @@ figure {
   }
 
   .filter-shell {
-    top: 115px;
+    top: var(--filter-top, 115px);
     padding: 10px;
     border-radius: 16px;
   }
@@ -2595,6 +2800,18 @@ figure {
 
   .brand-text strong {
     font-size: 0.7rem;
+  }
+
+  /* Four section links have to survive a 320px viewport. */
+  .header-nav {
+    gap: 6px;
+    padding-inline: 0;
+  }
+
+  .header-nav a {
+    font-size: 0.64rem;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
   }
 
   .brand-mark {
