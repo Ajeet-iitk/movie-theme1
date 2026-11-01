@@ -169,8 +169,11 @@ window.BlindReelAPI = (() => {
     const clean = String(text || "").replace(/\s+/g, " ").trim();
     if (!clean) return "";
     const match = clean.match(/^.{40,220}?[.!?](?=\s|$)/);
-    const sentence = match ? match[0] : clean.slice(0, 190);
-    return sentence.length < clean.length && !/[.!?]$/.test(sentence) ? `${sentence}…` : sentence;
+    if (match) return match[0];
+    if (clean.length <= 200) return clean;
+    // No sentence break anywhere: fall back to a clean word boundary so the
+    // card never ends mid-word like "betray...".
+    return `${clean.slice(0, 190).replace(/[\s,;:–-]+\S*$/, "")}…`;
   }
 
   function toCard(meta) {

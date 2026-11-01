@@ -393,10 +393,12 @@ figure {
   margin-inline: auto;
   max-width: 560px;
   overflow: hidden;
+  visibility: visible;
   transition:
     max-width 0.36s var(--ease),
     opacity 0.26s ease,
-    transform 0.36s var(--ease);
+    transform 0.36s var(--ease),
+    visibility 0s linear 0s;
 }
 
 .header-nav a {
@@ -437,7 +439,13 @@ figure {
   max-width: 0;
   opacity: 0;
   transform: translateY(-6px);
+  visibility: hidden;
   pointer-events: none;
+  transition:
+    max-width 0.36s var(--ease),
+    opacity 0.26s ease,
+    transform 0.36s var(--ease),
+    visibility 0s linear 0.36s;
 }
 
 .header-actions {
@@ -2468,7 +2476,8 @@ figure {
       margin 0.34s var(--ease),
       padding 0.34s var(--ease),
       opacity 0.22s ease,
-      border-color 0.34s ease;
+      border-color 0.34s ease,
+      visibility 0s linear 0s;
   }
 
   /* Collapsed on mobile means the second row physically disappears, so the
@@ -2481,6 +2490,14 @@ figure {
     border-top-color: transparent;
     opacity: 0;
     transform: none;
+    visibility: hidden;
+    transition:
+      max-height 0.34s var(--ease),
+      margin 0.34s var(--ease),
+      padding 0.34s var(--ease),
+      opacity 0.22s ease,
+      border-color 0.34s ease,
+      visibility 0s linear 0.34s;
   }
 
   .header-nav a {
