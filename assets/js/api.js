@@ -362,7 +362,7 @@ window.BlindReelAPI = (() => {
       vibe: meta.rating
         ? `New in Hindi cinema · ${meta.rating.toFixed(1)} on IMDb.`
         : "New in Hindi cinema.",
-      releasedAt: Date.parse(meta.released) || 0
+      releasedAt: Date.parse(meta.released) || Date.now()
     };
   }
 

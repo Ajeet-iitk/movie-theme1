@@ -1700,6 +1700,37 @@ figure {
   animation: confettiBurst 1s cubic-bezier(0.16, 0.72, 0.3, 1) forwards;
 }
 
+/* Skeleton loaders -------------------------------------------------------- */
+.card-skeleton {
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008)),
+    rgba(12, 14, 19, 0.55);
+}
+
+.card-skeleton .card-story {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Empty state */
 .empty-state {
   padding: 64px 24px;

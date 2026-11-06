@@ -344,7 +344,7 @@
      ------------------------------------------------------------------------- */
 
   function setRevealed(card, on, options = {}) {
-    const { celebrate = true, toast = true } = options;
+    const { celebrate = true, toast = true, focusReveal = true } = options;
     const button = card.querySelector(".reveal-btn");
     const label = card.querySelector(".reveal-label");
     const panel = card.querySelector(".card-reveal");
@@ -362,6 +362,14 @@
         burst(card);
         if (toast) showToast(randomFrom(TOASTS));
       }
+      // Focus the reveal panel for screen readers
+      if (focusReveal && panel) {
+        const revealTitle = panel.querySelector(".reveal-title");
+        if (revealTitle) {
+          revealTitle.setAttribute("tabindex", "-1");
+          setTimeout(() => revealTitle.focus({ preventScroll: true }), 600);
+        }
+      }
     } else {
       card.classList.remove("is-revealed");
       button.setAttribute("aria-expanded", "false");
@@ -370,6 +378,10 @@
       button.querySelector("use").setAttribute("href", "#i-eye");
       state.revealed.delete(card.dataset.title);
       if (toast) showToast("Back under wraps.");
+      // Return focus to the reveal button
+      if (focusReveal) {
+        button.focus({ preventScroll: true });
+      }
     }
 
     saveRevealed();
@@ -378,7 +390,7 @@
 
   function toggleCard(card) {
     const isOpen = card.classList.contains("is-revealed");
-    setRevealed(card, !isOpen, { celebrate: !isOpen, toast: true });
+    setRevealed(card, !isOpen, { celebrate: !isOpen, toast: true, focusReveal: true });
   }
 
   function burst(card) {
@@ -462,6 +474,11 @@
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", String(active));
     });
+    // On mobile, scroll the active segmented button into view
+    const activeBtn = document.querySelector(`.seg-btn[data-type="${type}"]`);
+    if (activeBtn && window.innerWidth <= 720) {
+      activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
   }
 
   function setMood(mood) {
@@ -471,6 +488,11 @@
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", String(active));
     });
+    // On mobile, scroll the active mood chip into view
+    const activeBtn = document.querySelector(`.mood-chip[data-mood="${mood}"]`);
+    if (activeBtn && window.innerWidth <= 720) {
+      activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
   }
 
   function matchesType(card) {
@@ -636,6 +658,8 @@
 
   function appendLive(grid, items, idSet, isBolly) {
     const start = grid.children.length;
+    // Remove any existing skeleton loaders
+    grid.querySelectorAll(".card-skeleton").forEach(s => s.remove());
     const html = items
       .map((film, index) => {
         idSet.add(film.id);
@@ -645,13 +669,55 @@
 
     grid.insertAdjacentHTML("beforeend", html);
     const fresh = [...grid.querySelectorAll(".card")].slice(start);
-    fresh.forEach((card) => {
+    fresh.forEach((card, index) => {
+      // Stagger the animation
+      card.style.opacity = "0";
+      card.style.transform = "translateY(20px)";
+      card.style.transition = "opacity 0.5s var(--ease), transform 0.5s var(--ease)";
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          card.style.opacity = "1";
+          card.style.transform = "translateY(0)";
+        }, index * 80);
+      });
+      
       if (state.revealed.has(card.dataset.title)) {
         setRevealed(card, true, { celebrate: false, toast: false });
       }
     });
     observe(fresh);
     return fresh.length;
+  }
+
+  function showSkeletonLoaders(grid, count) {
+    grid.querySelectorAll(".card-skeleton").forEach(s => s.remove());
+    for (let i = 0; i < count; i++) {
+      const skeleton = document.createElement("article");
+      skeleton.className = "card card-skeleton";
+      skeleton.style.setProperty("--accent", ACCENTS[i % ACCENTS.length]);
+      skeleton.innerHTML = `
+        <div class="card-top">
+          <span class="card-type"><svg class="icon" aria-hidden="true"><use href="#i-film"/></svg>Movie</span>
+          <span class="card-num">00</span>
+        </div>
+        <div class="card-tags"><span class="tag">Loading…</span></div>
+        <div class="card-body">
+          <span class="story-label">The story</span>
+          <p class="card-story"><span class="skeleton-line"></span><span class="skeleton-line"></span><span class="skeleton-line short"></span></p>
+        </div>
+        <div class="card-foot">
+          <button class="reveal-btn" type="button" disabled aria-hidden="true">
+            <span class="left"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg><span class="reveal-label">Loading…</span></span>
+            <svg class="icon chev" aria-hidden="true"><use href="#i-arrow-down"/></svg>
+          </button>
+        </div>
+      `;
+      grid.appendChild(skeleton);
+    }
+  }
+
+  function hideSkeletonLoaders(grid) {
+    grid.querySelectorAll(".card-skeleton").forEach(s => s.remove());
   }
 
   function curatedImdbIds() {
@@ -664,7 +730,11 @@
 
     if (!api || !els.liveGrid) return;
 
-    if (!more) els.liveStatus.textContent = "Connecting…";
+    if (!more) {
+      els.liveStatus.textContent = "Loading…";
+      showSkeletonLoaders(els.liveGrid, 6);
+    }
+    if (els.liveMore) els.liveMore.disabled = true;
 
     try {
       const items = await api.fresh({
@@ -672,6 +742,8 @@
         exclude: [...curatedImdbIds(), ...liveIds],
         force
       });
+
+      hideSkeletonLoaders(els.liveGrid);
 
       if (!items.length) {
         els.liveStatus.textContent = "You have seen everything on the shelf.";
@@ -685,7 +757,9 @@
       els.liveStatus.textContent = `${liveIds.size} added live · refreshed just now`;
       if (els.liveMore) els.liveMore.disabled = false;
     } catch (error) {
+      hideSkeletonLoaders(els.liveGrid);
       els.liveStatus.textContent = "Live catalogue unavailable — the curated list still works.";
+      if (els.liveMore) els.liveMore.disabled = false;
     }
   }
 
@@ -696,7 +770,11 @@
 
     if (!api || !els.bollyGrid) return;
 
-    if (!more) els.bollyStatus.textContent = "Looking for new releases…";
+    if (!more) {
+      els.bollyStatus.textContent = "Loading…";
+      showSkeletonLoaders(els.bollyGrid, 6);
+    }
+    if (els.bollyMore) els.bollyMore.disabled = true;
 
     try {
       const items = await api.bollywoodFresh({
@@ -704,6 +782,8 @@
         exclude: [...curatedImdbIds(), ...bollyIds],
         force
       });
+
+      hideSkeletonLoaders(els.bollyGrid);
 
       if (!items.length) {
         els.bollyStatus.textContent = "No new Hindi releases found right now.";
@@ -717,7 +797,9 @@
       els.bollyStatus.textContent = `${bollyIds.size} new releases · checked just now`;
       if (els.bollyMore) els.bollyMore.disabled = false;
     } catch (error) {
+      hideSkeletonLoaders(els.bollyGrid);
       els.bollyStatus.textContent = "Live Bollywood shelf unavailable — the curated list still works.";
+      if (els.bollyMore) els.bollyMore.disabled = false;
     }
   }
 
@@ -732,7 +814,7 @@
         document.querySelectorAll(`.card[data-imdb="${imdb}"]`).forEach((card) => {
           const ratingNode = card.querySelector(".rating-value");
           if (ratingNode && meta.rating) ratingNode.textContent = meta.rating.toFixed(1);
-          const runtimeNode = card.querySelector(".runtime-node, .runtime-value");
+          const runtimeNode = card.querySelector(".runtime-value");
           if (runtimeNode && meta.runtime) runtimeNode.textContent = meta.runtime;
         });
       });
@@ -752,6 +834,13 @@
         state.limit = pageSize();
         applyFiltersAndReturn();
       });
+      // Keyboard support for segmented buttons
+      button.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          button.click();
+        }
+      });
     });
 
     els.moodRow.addEventListener("click", (event) => {
@@ -762,10 +851,27 @@
       applyFiltersAndReturn();
     });
 
+    // Keyboard support for mood chips
+    els.moodRow.addEventListener("keydown", (event) => {
+      const button = event.target.closest(".mood-chip");
+      if (!button) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        button.click();
+      }
+    });
+
     if (els.seeMore) {
       els.seeMore.addEventListener("click", () => {
         state.limit += pageSize();
         applyFilters();
+      });
+      // Keyboard support for see more button
+      els.seeMore.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          els.seeMore.click();
+        }
       });
     }
 
@@ -775,6 +881,17 @@
       if (!button) return;
       const card = button.closest(".card");
       if (card) toggleCard(card);
+    });
+
+    // Keyboard support for reveal buttons
+    document.addEventListener("keydown", (event) => {
+      const button = event.target.closest(".reveal-btn");
+      if (!button) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        const card = button.closest(".card");
+        if (card) toggleCard(card);
+      }
     });
 
     // Soft spotlight follows the pointer inside each card (desktop only).
@@ -808,12 +925,37 @@
     const boredSurprise = document.getElementById("boredSurprise");
     if (boredSurprise) boredSurprise.addEventListener("click", surprise);
 
+    // Keyboard support for all surprise buttons
+    ["headerSurprise", "heroSurprise", "ctaSurprise", "emptySurprise", "boredSurprise"].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            btn.click();
+          }
+        });
+      }
+    });
+
     if (els.liveMore) {
       els.liveMore.addEventListener("click", () => loadLive({ more: true }));
+      els.liveMore.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          els.liveMore.click();
+        }
+      });
     }
 
     if (els.bollyMore) {
       els.bollyMore.addEventListener("click", () => loadBolly({ more: true }));
+      els.bollyMore.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          els.bollyMore.click();
+        }
+      });
     }
 
     els.resetBtn.addEventListener("click", () => {
@@ -830,8 +972,22 @@
       showToast(`The mystery is back. All ${TOTAL} titles hidden.`);
     });
 
+    els.resetBtn.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        els.resetBtn.click();
+      }
+    });
+
     els.toTop.addEventListener("click", () => {
       window.scrollTo({ top: 0, behavior: reducedMotion() ? "auto" : "smooth" });
+    });
+
+    els.toTop.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        els.toTop.click();
+      }
     });
 
     window.addEventListener(
